@@ -85,7 +85,8 @@ func ExcelTabularGenerator(format []byte, data []byte) (error, string) {
 
 	// Set summary values
 	for _, field := range formatData.Summary {
-		c := fmt.Sprintf("%s%d", GetColumnLetter(field.Index), len(formatData.Header)+2+len(items)+field.Index)
+		c := fmt.Sprintf("%s%d", GetColumnLetter(field.Index), len(formatData.Header)+2+len(items))
+		// fmt.Println(c)
 		file.SetCellValue("Sheet1", c, field.Text)
 		file.SetColWidth("Sheet1", GetColumnLetter(field.Index), GetColumnLetter(field.Index), float64(field.Width))
 		if IsDigit(string(field.Text)) {
@@ -98,7 +99,6 @@ func ExcelTabularGenerator(format []byte, data []byte) (error, string) {
 				fmt.Println(err)
 
 			}
-
 			if err := file.SetCellStyle("Sheet1", c, c, style); err != nil {
 				fmt.Println(err)
 			}

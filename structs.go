@@ -29,11 +29,3 @@ type SummaryField struct {
 	Text  string
 	Width int
 }
-
-type Item struct {
-	ProdId      string  `json:"prodId"`
-	Description string  `json:"description"`
-	Qty         int     `json:"qty"`
-	Price       float64 `json:"price"`
-	Amount      float64 `json:"amount"`
-}
