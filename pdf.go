@@ -8,12 +8,12 @@ import (
 	"github.com/jung-kurt/gofpdf"
 )
 
-func PdfTabularGenerator(format []byte, data []byte) (error, string) {
+func PdfTabularGenerator(format []byte, data []byte, filename string) (string, error) {
 	// Parse the format and data JSON arrays
 	var formatData Format
 	err := json.Unmarshal(format, &formatData)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	// Create a new PDF document
@@ -85,8 +85,6 @@ func PdfTabularGenerator(format []byte, data []byte) (error, string) {
 			x = 10
 			for _, field := range formatData.BodyFields {
 				if field.Field == string(key) {
-					// fmt.Println("================================")
-					// fmt.Println(field.Index, " > ", field.Field, " = ", string(value))
 					pdf.Rect(x, y, float64(tableCellWidth), 10, "")
 					pdf.SetXY(x, y)
 					txt := string(value)
@@ -119,11 +117,11 @@ func PdfTabularGenerator(format []byte, data []byte) (error, string) {
 	}
 
 	// Save the PDF file
-	filename := RandStringBytes(8) + ".pdf"
+	filename = filename + ".pdf"
 	err = pdf.OutputFileAndClose(filename)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	return nil, filename
+	return filename, nil
 }

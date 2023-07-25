@@ -8,12 +8,12 @@ import (
 	"github.com/xuri/excelize/v2"
 )
 
-func ExcelTabularGenerator(format []byte, data []byte) (error, string) {
+func ExcelTabularGenerator(format []byte, data []byte, filename string) (string, error) {
 	// Parse format and data JSON
 	var formatData Format
 	err := json.Unmarshal(format, &formatData)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	// Create a new Excel file
@@ -50,14 +50,10 @@ func ExcelTabularGenerator(format []byte, data []byte) (error, string) {
 	var items [][]byte
 	i := 0
 	jsonparser.ArrayEach(data, func(item []byte, dataType jsonparser.ValueType, offset int, err error) {
-		// fmt.Println(string(item))
 		items = append(items, item)
 		jsonparser.ObjectEach(item, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-			// fmt.Println(string(key), ">>>", string(value))
 			for _, field := range formatData.BodyFields {
 				if field.Field == string(key) {
-					// fmt.Println("================================")
-					// fmt.Println(field.Index, " > ", field.Field, " = ", string(value))
 					file.SetCellValue("Sheet1", fmt.Sprintf("%s%d", GetColumnLetter(field.Index), i+2+len(formatData.Header)), string(value))
 					file.SetColWidth("Sheet1", GetColumnLetter(field.Index), GetColumnLetter(field.Index), float64(field.Width))
 					if IsDigit(string(value)) {
@@ -106,13 +102,13 @@ func ExcelTabularGenerator(format []byte, data []byte) (error, string) {
 	}
 
 	// Save the Excel file
-	filename := RandStringBytes(8) + ".xlsx"
+	filename = filename + ".xlsx"
 	err = file.SaveAs(filename)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	return nil, filename
+	return filename, nil
 }
 
 func GetColumnLetter(index int) string {

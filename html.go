@@ -9,12 +9,12 @@ import (
 	"github.com/buger/jsonparser"
 )
 
-func HtmlTabularGenerator(format []byte, data []byte) (error, string) {
+func HtmlTabularGenerator(format []byte, data []byte, filename string) (string, error) {
 	// Parse the format and data JSON arrays
 	var formatData Format
 	err := json.Unmarshal(format, &formatData)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	// Create the HTML table string
@@ -43,7 +43,6 @@ func HtmlTabularGenerator(format []byte, data []byte) (error, string) {
 	var items [][]byte
 	i := 0
 	jsonparser.ArrayEach(data, func(item []byte, dataType jsonparser.ValueType, offset int, err error) {
-		// fmt.Println(string(item))
 		items = append(items, item)
 		var tds []string
 		for td, _ := range formatData.BodyFields {
@@ -52,11 +51,8 @@ func HtmlTabularGenerator(format []byte, data []byte) (error, string) {
 		tableHTML += "<tr>"
 
 		jsonparser.ObjectEach(item, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
-			// fmt.Println(string(key), ">>>", string(value))
 			for j, field := range formatData.BodyFields {
 				if field.Field == string(key) {
-					// fmt.Println("================================")
-
 					if IsDigit(string(value)) {
 						tds[j] = fmt.Sprintf("<td style='text-align: right' >%s</td>", value)
 					} else {
@@ -91,12 +87,12 @@ func HtmlTabularGenerator(format []byte, data []byte) (error, string) {
 	tableHTML += "</table>"
 
 	// Save the HTML file
-	filename := RandStringBytes(8) + ".html"
+	filename = filename + ".html"
 
 	err = ioutil.WriteFile(filename, []byte(tableHTML), 0644)
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
-	return nil, filename
+	return filename, nil
 }
