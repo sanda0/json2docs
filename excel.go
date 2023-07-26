@@ -25,17 +25,16 @@ func ExcelTabularGenerator(format []byte, data []byte, filename string) (string,
 		cell2 := fmt.Sprintf("%s%d", GetColumnLetter(len(formatData.BodyHeader)), field.Line)
 		file.SetCellValue("Sheet1", cell1, field.Text)
 		file.MergeCell("Sheet1", cell1, cell2)
-		// fmt.Println(cell1, cell2)
 		style, err := file.NewStyle(&excelize.Style{
 			Alignment: &excelize.Alignment{
 				Horizontal: "center",
 			},
 		})
 		if err != nil {
-			fmt.Println(err)
+			return "", err
 		}
 		if err := file.SetCellStyle("Sheet1", cell1, cell2, style); err != nil {
-			fmt.Println(err)
+			return "", err
 		}
 	}
 
@@ -49,7 +48,7 @@ func ExcelTabularGenerator(format []byte, data []byte, filename string) (string,
 	// Set body fields values
 	var items [][]byte
 	i := 0
-	jsonparser.ArrayEach(data, func(item []byte, dataType jsonparser.ValueType, offset int, err error) {
+	_, err = jsonparser.ArrayEach(data, func(item []byte, dataType jsonparser.ValueType, offset int, err error) {
 		items = append(items, item)
 		jsonparser.ObjectEach(item, func(key []byte, value []byte, dataType jsonparser.ValueType, offset int) error {
 			for _, field := range formatData.BodyFields {
@@ -63,12 +62,11 @@ func ExcelTabularGenerator(format []byte, data []byte, filename string) (string,
 							},
 						})
 						if err != nil {
-							fmt.Println(err)
-
+							return err
 						}
 						c := fmt.Sprintf("%s%d", GetColumnLetter(field.Index), i+2+len(formatData.Header))
 						if err := file.SetCellStyle("Sheet1", c, c, style); err != nil {
-							fmt.Println(err)
+							return err
 						}
 					}
 				}
@@ -79,10 +77,13 @@ func ExcelTabularGenerator(format []byte, data []byte, filename string) (string,
 		i++
 	})
 
+    if err != nil {
+        return "", err
+    }
+
 	// Set summary values
 	for _, field := range formatData.Summary {
 		c := fmt.Sprintf("%s%d", GetColumnLetter(field.Index), len(formatData.Header)+2+len(items))
-		// fmt.Println(c)
 		file.SetCellValue("Sheet1", c, field.Text)
 		file.SetColWidth("Sheet1", GetColumnLetter(field.Index), GetColumnLetter(field.Index), float64(field.Width))
 		if IsDigit(string(field.Text)) {
@@ -92,11 +93,11 @@ func ExcelTabularGenerator(format []byte, data []byte, filename string) (string,
 				},
 			})
 			if err != nil {
-				fmt.Println(err)
+				return "", err
 
 			}
 			if err := file.SetCellStyle("Sheet1", c, c, style); err != nil {
-				fmt.Println(err)
+				return "", err
 			}
 		}
 	}
