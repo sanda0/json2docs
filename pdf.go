@@ -2,7 +2,6 @@ package json2docs
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/buger/jsonparser"
 	"github.com/jung-kurt/gofpdf"
@@ -63,7 +62,6 @@ func PdfTabularGenerator(format []byte, data []byte, filename string) (string, e
 	}
 
 	tableCellWidth := availableWidth / float64(len(formatData.BodyFields))
-	fmt.Println(tableCellWidth)
 	// Print table header
 	x := 10.0
 	y := float64(len(formatData.Header)*10 + 20)
